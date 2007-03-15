@@ -1,0 +1,32 @@
+# HOS-80 ライブラリメイクファイル
+
+LIBS = timer.sof interrup.sof semaphor.sof eventflg.sof mailbox.sof \
+       fixmem.sof task.sof task_dsp.sof task_que.sof system.sof debug.sof
+LIBRFLAGS = -D__ERR_CHECK_LEVEL=4 -z80 -r -DZ80
+LIBR80 = libr80
+CFLAGS = 
+CC80 = lcc80
+
+.SUFFIXES:
+.SUFFIXES: .l .c .asz
+
+
+all: hos80_st.sof hos80.sof
+
+hos80.sof: $(LIBS)
+	del hos80.sof
+	sofar q hos80.sof @${$(LIBS)}
+
+clean:
+	del *.sof
+	del make.i
+
+
+.l.sof:
+	$(LIBR80) $(LIBRFLAGS) -o $@ $<
+
+.c.sof:
+	$(CC80) -c $(CFLAGS) -o $@ $<
+
+.asz.sof:
+	$(CC80) -c $(CFLAGS) -o $@ $<

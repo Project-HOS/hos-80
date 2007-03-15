@@ -1,0 +1,54 @@
+; -----------------------------------------------------------------------------
+;  ROS スタートアップルーチン                                                  
+;                                                  Copyright (C) 1998 by Ryuz  
+; -----------------------------------------------------------------------------
+
+		cseg
+
+		extrn	int_vector
+		extrn   __initialize_
+		extrn	start_up_
+		extrn	__tsk_dsp_
+		extrn	sysstat_
+		extrn	int_cnt_
+		extrn	system_stack
+
+	; -------- スタート
+start::		di
+		ld	SP,system_stack	; RAMの最後
+		im	2
+		ld	a,int_vector / 256
+		ld	i,a		; 割り込みベクタセット
+		
+	; -------- RAM領域のクリア(不要なら削除可)
+		ld	hl,DATATOP
+		ld	de,DATATOP + 1
+		ld	bc,_endx_## - DATATOP - 1
+		ld	(hl),0
+		ldir
+		
+	; -------- 初期化ルーチン呼び出し
+		ld	a,04h
+		ld	(sysstat_),a	; スタートアップはタスク独立部
+		ld	a,0ffh
+		ld	(int_cnt_),a	; 割り込み中とみなす
+		call	__initialize_	; システムの初期化
+		call	start_up_	; 初期ルーチン
+		xor	a
+		ld	(sysstat_),a
+		ld	(int_cnt_),a
+		jp	__tsk_dsp_	; タスク部に移行
+
+
+	; -------- モード１ 割り込み
+		org	38h
+		rst	00h
+	
+	; -------- NMI 割り込み
+		org	66h
+		retn
+
+		dseg
+DATATOP::	
+
+		end

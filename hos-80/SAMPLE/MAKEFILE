@@ -1,0 +1,7 @@
+
+sample.hex: sample.c sample.h cfg_c.c cfg_asm.asz
+	lcc80 -o sample.hex sample.c cfg_c.c cfg_asm.asz
+
+cfg_c.c: hos.cfg
+	hcfg80
+
